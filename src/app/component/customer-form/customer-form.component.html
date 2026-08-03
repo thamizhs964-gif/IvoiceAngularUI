@@ -1,0 +1,119 @@
+<div class="customer-form-small" style="margin: 20px">
+  <h3>{{ isEdit ? "Edit Customer" : "Create Customer" }}</h3>
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="form">
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>customer Code</mat-label>
+          <input matInput formControlName="customerCode" appSelectOnFocus />
+          <mat-error *ngIf="(isSubmitted || f['customerCode'].touched) && f['customerCode'].errors?.['required']">
+            <mat-icon color="warn">error</mat-icon> customer Code is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>customer Name</mat-label>
+          <input matInput formControlName="customerName" appSelectOnFocus />
+          <mat-error *ngIf="(isSubmitted || f['customerName'].touched) && f['customerName'].errors?.['required']">
+            <mat-icon color="warn">error</mat-icon> customer Name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>contact Person</mat-label>
+          <input matInput formControlName="contactPerson" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>mobile No</mat-label>
+          <input matInput formControlName="mobileNo" (keypress)="allowOnlyNumbers($event)" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>email</mat-label>
+          <input matInput formControlName="email" appSelectOnFocus />
+          <mat-error *ngIf="f['email'].errors?.['email']">
+            <mat-icon color="warn">error</mat-icon> Invalid email
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>address 1</mat-label>
+          <textarea matInput rows="2" formControlName="address1" appSelectOnFocus></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>address 2</mat-label>
+          <textarea matInput rows="2" formControlName="address2" appSelectOnFocus></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>city</mat-label>
+          <input matInput formControlName="city" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>state</mat-label>
+          <input matInput formControlName="state" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>country</mat-label>
+          <input matInput formControlName="country" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>zip Code</mat-label>
+          <input matInput formControlName="zipCode" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-form-field appearance="outline" style="width:50%">
+          <mat-label>gst No</mat-label>
+          <input matInput formControlName="gstNo" appSelectOnFocus />
+        </mat-form-field>
+      </div>
+
+      <div class="form-field">
+        <mat-label>is Active?</mat-label>
+        <mat-radio-group formControlName="isActive" class="radio-group">
+          <mat-radio-button [value]="true" color="primary">Active</mat-radio-button>
+          <mat-radio-button [value]="false" color="warn">InActive</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      
+      <br />
+
+      <button mat-flat-button color="primary">
+        {{ isEdit ? "Update" : "Save" }}
+      </button>
+
+      <button mat-stroked-button (click)="dialogRef.close()" style="margin-left:10px">
+        Cancel
+      </button>
+
+    </form>
+  </mat-dialog-content>
+</div>
