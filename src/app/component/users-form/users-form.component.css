@@ -1,0 +1,83 @@
+.error-text {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+    color: #d32f2f;
+}
+.error-text mat-icon {
+    font-size: 16px;
+    vertical-align: middle;
+}
+::ng-deep .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-floating-label {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+.form-field {
+    margin-bottom: 10px;
+}
+.user-form-small .mat-mdc-form-field {
+  font-size: 14px;
+  min-height: 35px;
+}
+
+.user-form-small .mat-mdc-form-field-flex {
+  padding: 0 8px;
+}
+
+.user-form-small .mat-mdc-input-element {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 14px;
+  line-height: 28px;
+}
+
+.user-form-small .mat-mdc-floating-label {
+  font-size: 12px;
+}
+
+.user-form-small .mat-mdc-form-field-subscript-wrapper {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.user-form-small .mat-radio-button .mat-radio-label {
+  font-size: 13px;
+  margin: 0 8px 0 0;
+}
+
+.user-form-small .mat-radio-container {
+  height: 20px;
+}
+
+.user-form-small textarea.mat-mdc-input-element {
+  height: auto;
+  min-height: 50px;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 20px;
+  resize: vertical;
+}
+
+/* Buttons */
+
+.user-form-small button {
+  margin-right: 10px;
+}
+
+/* Dialog Content */
+
+.user-form-small mat-dialog-content {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+  .user-form-small .mat-mdc-form-field {
+    width: 100% !important;
+  }
+
+}
