@@ -11,7 +11,8 @@ export const routes: Routes = [
             { path: 'category', loadComponent: () => import('./component/category-list/category-list.component').then(m => m.CategoryListComponent)},
             { path: 'itemmaster', loadComponent: () => import('./component/item-list/item-list.component').then(m => m.ItemListComponent)},
             { path: 'customer', loadComponent: () => import('./component/customer-list/customer-list.component').then(m => m.CustomerListComponent)},
-            { path: 'users', loadComponent: () => import('./component/users-list/users-list.component').then(m => m.UsersListComponent)}
+            { path: 'users', loadComponent: () => import('./component/users-list/users-list.component').then(m => m.UsersListComponent)},
+            { path: 'vendor', loadComponent: () => import('./component/vendor-list/vendor-list.component').then(m => m.VendorListComponent)}
         ]
     },
     {
