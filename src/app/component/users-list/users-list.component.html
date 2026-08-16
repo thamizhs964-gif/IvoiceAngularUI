@@ -1,0 +1,221 @@
+<div style="margin: 20px">
+  <div *ngIf="isLoading">Loading....</div>
+
+  <form
+    [formGroup]="filterForm"
+    style="margin-bottom: 10px; display: flex; gap: 10px"
+  >
+    <mat-form-field appearance="outline">
+      <mat-label>User Name</mat-label>
+      <input matInput formControlName="userName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Display Name</mat-label>
+      <input matInput formControlName="displayName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>City</mat-label>
+      <input matInput formControlName="city" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>DateOfBirth</mat-label>
+      <input matInput formControlName="dateOfBirth" />
+    </mat-form-field>
+
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      Clear
+    </button>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openAddDialog()"
+    >
+      Add User
+    </button>
+  </form>
+
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    matSort
+    class="mat-elevation-z8"
+    style="width: 100%"
+  >
+
+    <!-- User Name -->
+    <ng-container matColumnDef="userName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>User Name</th>
+      <td mat-cell *matCellDef="let user">{{ user.userName }}</td>
+    </ng-container>
+
+    <!-- Email -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.email }}
+      </td>
+    </ng-container>
+
+    <!-- Password -->
+    <ng-container matColumnDef="password">
+      <th mat-header-cell *matHeaderCellDef>Password</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.password | slice:0:10 }}
+      </td>
+    </ng-container>
+
+    <!-- First Name -->
+    <ng-container matColumnDef="firstName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.firstName }}
+      </td>
+    </ng-container>
+
+    <!-- Middle Name -->
+    <ng-container matColumnDef="middleName">
+      <th mat-header-cell *matHeaderCellDef>Middle Name</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.middleName }}
+      </td>
+    </ng-container>
+
+    <!-- Last Name -->
+    <ng-container matColumnDef="lastName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.lastName }}
+      </td>
+    </ng-container>
+
+    <!-- Display Name -->
+    <ng-container matColumnDef="displayName">
+      <th mat-header-cell *matHeaderCellDef>Display Name</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.displayName }}
+      </td>
+    </ng-container>
+
+    <!-- Phone Number -->
+    <ng-container matColumnDef="phoneNumber">
+      <th mat-header-cell *matHeaderCellDef>Phone Number</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.phoneNumber }}
+      </td>
+    </ng-container>
+
+    <!-- Alternate Phone -->
+    <ng-container matColumnDef="alternatePhone">
+      <th mat-header-cell *matHeaderCellDef>Alternate Phone</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.alternatePhone }}
+      </td>
+    </ng-container>
+
+    <!-- Address Line 1 -->
+    <ng-container matColumnDef="addressLine1">
+      <th mat-header-cell *matHeaderCellDef>Address Line 1</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.addressLine1 | slice:0:20 }}
+      </td>
+    </ng-container>
+
+    <!-- Address Line 2 -->
+    <ng-container matColumnDef="addressLine2">
+      <th mat-header-cell *matHeaderCellDef>Address Line 2</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.addressLine2 | slice:0:20 }}
+      </td>
+    </ng-container>
+
+    <!-- City -->
+    <ng-container matColumnDef="city">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.city }}
+      </td>
+    </ng-container>
+
+    <!-- State -->
+    <ng-container matColumnDef="state">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>State</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.state }}
+      </td>
+    </ng-container>
+
+    <!-- Zip Code -->
+    <ng-container matColumnDef="zipCode">
+      <th mat-header-cell *matHeaderCellDef>Zip Code</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.zipCode }}
+      </td>
+    </ng-container>
+
+    <!-- Country -->
+    <ng-container matColumnDef="country">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Country</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.country }}
+      </td>
+    </ng-container>
+
+    <!-- Date Of Birth -->
+    <ng-container matColumnDef="dateOfBirth">
+      <th mat-header-cell *matHeaderCellDef>Date Of Birth</th>
+      <td mat-cell *matCellDef="let user">
+        {{ user.dateOfBirth | date:'dd/MM/yyyy' }}
+      </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+      <td mat-cell *matCellDef="let user">
+
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="openEditDialog(user)"
+        >
+          Edit
+        </button>
+
+        <button
+          mat-flat-button
+          color="warn"
+          (click)="delete(user.id, user.userName)"
+          style="margin-left:5px"
+        >
+          Delete
+        </button>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+    ></tr>
+
+  </table>
+
+  <mat-paginator
+    [length]="totalRecords"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    showFirstLastButtons
+    (page)="onPageChange($event)"
+  >
+  </mat-paginator>
+
+</div>
