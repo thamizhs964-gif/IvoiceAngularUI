@@ -8,10 +8,10 @@ export const routes: Routes = [
         path:'masters',
         canActivate: [authGuard],
         children: [
-            { path: 'category', loadComponent: () => import('./component/category-list/category-list.component').then(m => m.CategoryListComponent)}
+            { path: 'category', loadComponent: () => import('./component/category-list/category-list.component').then(m => m.CategoryListComponent)},
+            { path: 'itemmaster', loadComponent: () => import('./component/item-list/item-list.component').then(m => m.ItemListComponent)}
         ]
     },
-
     {
         path: 'exit',
         canActivate:[authGuard],
