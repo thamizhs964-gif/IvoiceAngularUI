@@ -1,0 +1,158 @@
+<div style="margin: 20px">
+  <div *ngIf="isLoading">Loading....</div>
+ 
+  <form
+    [formGroup]="filterForm"
+    style="margin-bottom: 10px; display: flex; gap: 10px"
+  >
+    <mat-form-field appearance="outline">
+      <mat-label>Vendor Code</mat-label>
+      <input matInput formControlName="vendorCode" />
+    </mat-form-field>
+ 
+    <mat-form-field appearance="outline">
+      <mat-label>Vendor Name</mat-label>
+      <input matInput formControlName="vendorName" />
+    </mat-form-field>
+ 
+    <mat-form-field appearance="outline">
+      <mat-label>Mobile No</mat-label>
+      <input matInput formControlName="mobileNo" />
+    </mat-form-field>
+ 
+    <mat-form-field appearance="outline">
+      <mat-label>City</mat-label>
+      <input matInput formControlName="city" />
+    </mat-form-field>
+ 
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      Clear
+    </button>
+ 
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openAddDialog()"
+    >
+      Add Vendor
+    </button>
+  </form>
+ 
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    matSort
+    class="mat-elevation-z8"
+    style="width: 100%"
+  >
+ 
+    <ng-container matColumnDef="vendorCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Vendor Code</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.vendorCode }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="vendorName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Vendor Name</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.vendorName }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="contactPerson">
+      <th mat-header-cell *matHeaderCellDef>Contact Person</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.contactPerson }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="mobileNo">
+      <th mat-header-cell *matHeaderCellDef>Mobile No</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.mobileNo }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.email }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="city">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.city }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="state">
+      <th mat-header-cell *matHeaderCellDef>State</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.state }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="country">
+      <th mat-header-cell *matHeaderCellDef>Country</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.country }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="gstNo">
+      <th mat-header-cell *matHeaderCellDef>GST No</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.gstNo }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="isActive">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let vendor">
+        {{ vendor.isActive }}
+      </td>
+    </ng-container>
+ 
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+ 
+      <td mat-cell *matCellDef="let vendor">
+ 
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="openEditDialog(vendor)">
+          Edit
+        </button>
+ 
+        <button
+          mat-flat-button
+          class="delete-btn"
+          (click)="delete(vendor.id, vendor.vendorName)">
+          Delete
+        </button>
+ 
+      </td>
+    </ng-container>
+ 
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+ 
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+ 
+  </table>
+ 
+  <mat-paginator
+    [length]="totalRecords"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="[5,10,25,50]"
+    showFirstLastButtons
+    (page)="onPageChange($event)">
+  </mat-paginator>
+ 
+</div>
+ 
