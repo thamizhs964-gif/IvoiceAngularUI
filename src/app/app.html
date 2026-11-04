@@ -1,0 +1,36 @@
+<mat-toolbar class="top-menu">
+ 
+  <button mat-button routerLink="/home" routerLinkActive="active-link">Home</button>
+
+  <button mat-button [matMenuTriggerFor]="mastersMenu" routerLinkActive="active-link">Masters</button>
+  <mat-menu #mastersMenu="matMenu">
+    <button mat-menu-item routerLink="/masters/category">Category</button>
+    <button mat-menu-item routerLink="/masters/itemmaster">itemmaster</button>
+    <button mat-menu-item routerLink="/masters/customer">Customer</button>
+    <button mat-menu-item routerLink="/masters/users">Users</button>
+    <button mat-menu-item routerLink="/masters/vendor">Vendor</button>
+  </mat-menu>
+ 
+   
+  <button mat-button [matMenuTriggerFor]="transMenu" routerLinkActive="active-link">Transactions</button>
+  <mat-menu #transMenu="matMenu">
+    <button mat-menu-item routerLink="/transactions/indent">Indent</button>
+    <button mat-menu-item routerLink="/transactions/po">Purchase Order</button>
+    <button mat-menu-item routerLink="/transactions/inward">Material Inward</button>
+    <button mat-menu-item routerLink="/transactions/receipt">Receipt</button>
+  </mat-menu>
+ 
+  
+  <button mat-button>Processings</button>
+  <button mat-button>Reports</button>
+  <button mat-button>Utilities</button>
+ 
+  <span class="spacer"></span>
+ 
+  <button mat-button color="warn">Exit</button>
+ <mat-menu #exitMenu="matMenu">
+    <button mat-menu-item routerLink="/exit/logout">Logout</button>
+  </mat-menu>
+</mat-toolbar>
+<router-outlet></router-outlet>
+ 

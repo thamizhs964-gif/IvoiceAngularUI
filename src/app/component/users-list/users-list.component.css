@@ -1,0 +1,102 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f5f5f5;
+}
+
+tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.wrap-text {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 175px;
+    line-height: 1.2;
+}
+
+/* Users List Specific Styles */
+
+.mat-mdc-form-field {
+    min-width: 180px;
+}
+
+.mat-mdc-table {
+    width: 100%;
+    overflow: auto;
+}
+
+.mat-column-userName,
+.mat-column-email,
+.mat-column-password,
+.mat-column-firstName,
+.mat-column-middleName,
+.mat-column-lastName,
+.mat-column-displayName,
+.mat-column-phoneNumber,
+.mat-column-alternatePhone,
+.mat-column-addressLine1,
+.mat-column-addressLine2,
+.mat-column-city,
+.mat-column-state,
+.mat-column-zipCode,
+.mat-column-country,
+.mat-column-dateOfBirth {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 175px;
+}
+
+.mat-column-actions {
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+button {
+    margin-right: 5px;
+}
+
+.mat-mdc-paginator {
+    margin-top: 10px;
+}
+
+@media screen and (max-width: 768px) {
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .mat-mdc-form-field {
+        width: 100%;
+    }
+}
+.mat-mdc-unelevated-button.mat-warn {
+
+    background-color: #dc3545 !important;
+
+    color: white !important;
+
+}
+ 
+.mat-mdc-unelevated-button.mat-warn:hover {
+
+    background-color: #c82333 !important;
+
+}
+ 

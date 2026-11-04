@@ -1,0 +1,38 @@
+.navbar {
+  background-color: #1976d2;
+  padding: 10px;
+}
+.navbar a {
+  color: white;
+  margin-right: 20px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.navbar a.active {
+  text-decoration: underline;
+}
+.navbar a:hover {
+  color: #ffeb3b;
+}
+.spacer {
+  flex: 1 1 auto;
+}
+.top-menu {
+  background-color: #1976d2;
+  color: #ffffff;            
+  font-weight: 500;
+}
+.top-menu button {
+  color: #ffffff !important;
+  font-weight: 500;
+  margin-right: 10px;
+}
+.top-menu button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+.top-menu button.active-link {
+  background: linear-gradient(90deg, #1976d2, #42a5f5);
+}
+ 
+ 
