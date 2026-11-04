@@ -158,7 +158,6 @@ export class CustomerListComponent implements OnInit {
     if (!result) return;
 
     try {
- 
       await firstValueFrom(this.service.delete(id));
 
       this.snackBar.open('Customer deleted successfully', 'Close', {
