@@ -1,132 +1,141 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { VendorService } from '../../services/vendor.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatIconModule } from '@angular/material/icon';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent } from '@angular/material/dialog';
-import { Vendor } from '../../models/vendor';
-import { SelectOnFocusDirective } from "../../custom-directives/select-on-focus.directive";
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { VendorService } from '../../services/vendor.service';
+import { VendorRequest } from '../../models/vendor';
+import { getApiMessage } from '../../shared/api-helpers';
+import { failMessage, isOk } from '../../shared/api-result';
  
 @Component({
   selector: 'app-vendor-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
-    RouterModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatRadioModule,
-    MatIconModule,
-    SelectOnFocusDirective,
-    MatDialogContent
+    MatCheckboxModule,
+    MatProgressBarModule,
   ],
   templateUrl: './vendor-form.component.html',
-  styleUrls: ['./vendor-form.component.css']
+  styleUrl: '../../shared/master-page.css',
 })
 export class VendorFormComponent implements OnInit {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly service = inject(VendorService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
  
-  form!: FormGroup;
-  isEdit = false;
-  id!: number;
-  isSubmitted = false;
+  readonly vendorId = signal(0);
+  readonly isEdit = computed(() => this.vendorId() > 0);
+  readonly isLoading = signal(false);
+  readonly isSaving = signal(false);
  
-  constructor(
-    private fb: FormBuilder,
-    private service: VendorService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private snackBar: MatSnackBar,
-    public dialogRef: MatDialogRef<VendorFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) { }
+  readonly form = this.fb.group({
+    vendorCode: ['', [Validators.required, Validators.maxLength(20)]],
+    vendorName: ['', [Validators.required, Validators.maxLength(100)]],
+    city: ['', Validators.maxLength(50)],
+    state: ['', Validators.maxLength(50)],
+    isActive: [true],
+  });
  
-  get f() {
-    return this.form.controls;
-  }
+  async ngOnInit(): Promise<void> {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
  
-  ngOnInit(): void {
- 
-    this.form = this.fb.group({
-      vendorCode: ['', [Validators.required, Validators.maxLength(20)]],
-      vendorName: ['', [Validators.required, Validators.maxLength(100)]],
-      contactPerson: ['', Validators.maxLength(100)],
-      mobileNo: ['', Validators.maxLength(20)],
-      email: ['', [Validators.email, Validators.maxLength(100)]],
-      address1: ['', Validators.maxLength(200)],
-      address2: ['', Validators.maxLength(200)],
-      city: ['', Validators.maxLength(100)],
-      state: ['', Validators.maxLength(100)],
-      country: ['', Validators.maxLength(100)],
-      zipCode: ['', Validators.maxLength(20)],
-      gstNo: ['', Validators.maxLength(50)],
-      isActive: [true],
-      isDeleted: [false]
-    });
- 
-    if (this.data) {
-      this.isEdit = true;
-      this.id = this.data.id;
-      this.form.patchValue(this.data);
+    if (id > 0) {
+      this.vendorId.set(id);
+      await this.load(id);
     }
   }
  
-  submit() {
+  private async load(id: number): Promise<void> {
+    this.isLoading.set(true);
  
-    this.isSubmitted = true;
+    try {
+      const response = await firstValueFrom(this.service.getById(id));
  
+      if (!response.success || !response.data) {
+        this.notify(response.message || 'Vendor not found');
+        this.goBack();
+        return;
+      }
+ 
+      const c = response.data;
+ 
+      this.form.patchValue({
+        vendorCode: c.vendorCode,
+        vendorName: c.vendorName,
+        city: c.city ?? '',
+        state: c.state ?? '',
+        isActive: c.isActive ?? true,
+      });
+ 
+      this.form.markAsPristine();
+    } catch (error) {
+      this.notify(getApiMessage(error, 'Unable to load the vendor'));
+      this.goBack();
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+ 
+  async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.notify('Please fix the highlighted errors');
       return;
     }
  
-    const payload: Vendor = {
-      ...this.form.value,
-      isActive: this.form.value.isActive === true,
-      isDeleted: this.form.value.isDeleted === true
+    const value = this.form.getRawValue();
+ 
+    const request: VendorRequest = {
+      vendorCode: value.vendorCode.trim(),
+      vendorName: value.vendorName.trim(),
+      city: value.city.trim() || null,
+      state: value.state.trim() || null,
+      isActive: value.isActive,
+      isDeleted: false
     };
  
-    if (this.isEdit) {
+    this.isSaving.set(true);
  
-      this.service.Update(this.id, payload).subscribe({
-        next: () => {
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.snackBar.open('Error updating vendor', 'Close', {
-            duration: 3000
-          });
-        }
-      });
+    try {
+      const response = this.isEdit()
+        ? await firstValueFrom(this.service.update(this.vendorId(), request))
+        : await firstValueFrom(this.service.create(request));
  
-    } else {
+      if (!isOk(response)) {
+        this.notify(failMessage(response, 'Save failed'));
+        return;
+      }
  
-      this.service.create(payload).subscribe({
-        next: () => {
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.snackBar.open('Error creating vendor', 'Close', {
-            duration: 3000
-          });
-        }
-      });
+      this.notify(this.isEdit() ? 'Vendor updated successfully' : 'Vendor created successfully');
  
+      this.form.markAsPristine();
+      this.goBack();
+    } catch (error) {
+      // e.g. duplicate code
+      this.notify(getApiMessage(error, 'Unable to save the vendor'));
+    } finally {
+      this.isSaving.set(false);
     }
   }
  
-  allowOnlyNumbers(event: KeyboardEvent) {
-    const charCode = event.key;
-    if (!/^[0-9]$/.test(charCode)) {
-      event.preventDefault();
-    }
+  goBack(): void {
+    void this.router.navigate(['/masters/vendors']);
   }
  
+  private notify(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 4000 });
+  }
 }
+ 
+ 

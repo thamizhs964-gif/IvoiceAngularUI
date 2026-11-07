@@ -1,260 +1,201 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { UsersService } from '../../services/users.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MAT_DIALOG_DATA,MatDialogRef,MatDialogContent} from '@angular/material/dialog';
-import { Users } from '../../models/users';
-import { SelectOnFocusDirective } from "../../custom-directives/select-on-focus.directive";
-
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserService } from '../../services/users.service';
+import { UserRequest } from '../../models/users';
+import { getApiMessage, toApiDate } from '../../shared/api-helpers';
+import { failMessage, isOk } from '../../shared/api-result';
+ 
 @Component({
-  selector: 'app-users-form',
+  selector: 'app-user-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
-    RouterModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatRadioModule,
-    MatSelectModule,
-    MatIconModule,
-    SelectOnFocusDirective,
-    MatDialogContent
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatProgressBarModule,
   ],
   templateUrl: './users-form.component.html',
-  styleUrls: ['./users-form.component.css']
+  styleUrl: '../../shared/master-page.css',
 })
-export class UsersFormComponent implements OnInit
-{
-  form!: FormGroup;
-  isEdit = false;
-  id!: number;
-  isSubmitted = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private service: UsersService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private snackBar: MatSnackBar,
-    public dialogRef: MatDialogRef<UsersFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-  ) {}
-
-  get f() {
-    return this.form.controls;
-  }
-
-  ngOnInit(): void {
-
-    this.form = this.fb.group({
-
-      userName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(100)
-        ]
-      ],
-
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email,
-          Validators.maxLength(255)
-        ]
-      ],
-
-      password: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(500)
-        ]
-      ],
-
-      firstName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(100)
-        ]
-      ],
-
-      middleName: [
-        '',
-        [
-          Validators.maxLength(100)
-        ]
-      ],
-
-      lastName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(100)
-        ]
-      ],
-
-      displayName: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(1),
-          Validators.maxLength(200)
-        ]
-      ],
-
-      phoneNumber: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(25)
-        ]
-      ],
-
-      alternatePhone: [
-        '',
-        [
-          Validators.maxLength(25)
-        ]
-      ],
-
-      addressLine1: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(255)
-        ]
-      ],
-
-      addressLine2: [
-        '',
-        [
-          Validators.maxLength(255)
-        ]
-      ],
-
-      city: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(100)
-        ]
-      ],
-
-      state: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(100)
-        ]
-      ],
-
-      zipCode: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(20)
-        ]
-      ],
-
-      country: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(100)
-        ]
-      ],
-
-      dateOfBirth: ['', Validators.required],
-
-      isActive: [true]
-
-    });
-
-    if (this.data) {
-      this.isEdit = true;
-      this.id = this.data.id;
-      
-      this.form.patchValue({
-    ...this.data,
-    dateOfBirth: this.data.dateOfBirth
-      ? this.data.dateOfBirth.split('T')[0]
-      : ''
+export class UserFormComponent implements OnInit {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly service = inject(UserService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
+ 
+  readonly userId = signal(0);
+  readonly isEdit = computed(() => this.userId() > 0);
+  readonly isLoading = signal(false);
+  readonly isSaving = signal(false);
+ 
+  readonly form = this.fb.group({
+    // Account
+    userName: ['', [Validators.required, Validators.maxLength(50)]],
+    email: [
+      '',
+      [Validators.required, Validators.email, Validators.maxLength(100)],
+    ],
+    password: [
+      '',
+      [Validators.required, Validators.minLength(8), Validators.maxLength(100)],
+    ],
+    IsActive: [true],
+    // Name
+    firstName: ['', [Validators.required, Validators.maxLength(50)]],
+    middleName: ['', Validators.maxLength(50)],
+    lastName: ['', [Validators.required, Validators.maxLength(50)]],
+    displayName: ['', Validators.maxLength(100)],
+ 
+    // Contact
+    phoneNumber: ['', [Validators.required, Validators.maxLength(20)]],
+    alternatePhone: ['', Validators.maxLength(20)],
+    dateOfBirth: [null as Date | null],
+ 
+    // Address
+    addressLine1: ['', [Validators.required, Validators.maxLength(150)]],
+    addressLine2: ['', Validators.maxLength(150)],
+    city: ['', [Validators.required, Validators.maxLength(50)]],
+    state: ['', [Validators.required, Validators.maxLength(50)]],
+    zipCode: ['', [Validators.required, Validators.maxLength(15)]],
+    country: ['', [Validators.required, Validators.maxLength(50)]],
   });
+ 
+  async ngOnInit(): Promise<void> {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+ 
+    if (id > 0) {
+      this.userId.set(id);
+      this.form.controls.password.clearValidators();
+      this.form.controls.password.updateValueAndValidity();
+      await this.load(id);
     }
   }
-
-  submit() {
-
-    this.isSubmitted = true;
-
+ 
+  private async load(id: number): Promise<void> {
+    this.isLoading.set(true);
+ 
+    try {
+      const response = await firstValueFrom(this.service.getById(id));
+ 
+      if (!response.success || !response.data) {
+        this.notify(response.message || 'User not found');
+        this.goBack();
+        return;
+      }
+ 
+      const u = response.data;
+ 
+      this.form.patchValue({
+        userName: u.userName,
+        email: u.email,
+        IsActive: u.isActive,
+        firstName: u.firstName,
+        middleName: u.middleName ?? '',
+        lastName: u.lastName,
+        displayName: u.displayName,
+        phoneNumber: u.phoneNumber,
+        alternatePhone: u.alternatePhone ?? '',
+        dateOfBirth: u.dateOfBirth ? new Date(u.dateOfBirth) : null,
+        addressLine1: u.addressLine1,
+        addressLine2: u.addressLine2 ?? '',
+        city: u.city,
+        state: u.state,
+        zipCode: u.zipCode,
+        country: u.country,
+      });
+ 
+      this.form.markAsPristine();
+    } catch (error) {
+      this.notify(getApiMessage(error, 'Unable to load the user'));
+      this.goBack();
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+ 
+  async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.notify('Please fix the highlighted errors');
       return;
     }
-
-    const payload: Users = {
-      ...this.form.value
+ 
+    const v = this.form.getRawValue();
+ 
+    const request: UserRequest = {
+      userName: v.userName.trim(),
+      email: v.email.trim(),
+      firstName: v.firstName.trim(),
+      middleName: v.middleName.trim() || null,
+      lastName: v.lastName.trim(),
+      // blank display name -> "First Last"
+      displayName:
+        v.displayName.trim() || `${v.firstName.trim()} ${v.lastName.trim()}`,
+      phoneNumber: v.phoneNumber.trim(),
+      alternatePhone: v.alternatePhone.trim() || null,
+      addressLine1: v.addressLine1.trim(),
+      addressLine2: v.addressLine2.trim() || null,
+      city: v.city.trim(),
+      state: v.state.trim(),
+      zipCode: v.zipCode.trim(),
+      country: v.country.trim(),
+      dateOfBirth: v.dateOfBirth ? toApiDate(v.dateOfBirth) : null,
+      isActive: v.IsActive,
+      ...(!this.isEdit() ? { password: v.password } : {}),
     };
-
-    if (this.isEdit) {
-
-      this.service.Update(this.id, payload).subscribe({
-        next: () => {
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.snackBar.open(
-            'Error updating user',
-            'Close',
-            {
-              duration: 3000
-            }
-          );
-        },
-      });
-
-    } else {
-
-      this.service.Create(payload).subscribe({
-        next: () => {
-          this.dialogRef.close(true);
-        },
-        error: () => {
-          this.snackBar.open(
-            'Error creating user',
-            'Close',
-            {
-              duration: 3000
-            }
-          );
-        },
-      });
-
+ 
+    this.isSaving.set(true);
+ 
+    try {
+      const response = this.isEdit()
+        ? await firstValueFrom(this.service.update(this.userId(), request))
+        : await firstValueFrom(this.service.create(request));
+ 
+      if (!isOk(response)) {
+        this.notify(failMessage(response, 'Save failed'));
+        return;
+      }
+ 
+      this.notify(
+        this.isEdit()
+          ? 'User updated successfully'
+          : 'User created successfully',
+      );
+ 
+      this.form.markAsPristine();
+      this.goBack();
+    } catch (error) {
+      // e.g. duplicate user name / email
+      this.notify(getApiMessage(error, 'Unable to save the user'));
+    } finally {
+      this.isSaving.set(false);
     }
   }
-
-  allowOnlyNumbers(event: KeyboardEvent) {
-    const charCode = event.key;
-
-    if (!/^[0-9]$/.test(charCode)) {
-      event.preventDefault();
-    }
+ 
+  goBack(): void {
+    void this.router.navigate(['/masters/users']);
+  }
+ 
+  private notify(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 4000 });
   }
 }
+ 
+ 

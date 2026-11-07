@@ -1,230 +1,176 @@
-import { Component, OnInit, ViewChild, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { CustomerService } from '../../services/customer.service';
-import { Customer } from '../../models/customer';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
-import { CustomerFormComponent } from '../customer-form/customer-form.component';
-import { PagedResult } from '../../models/paged-result';
-
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { CustomerService } from '../../services/customer.service';
+import { Customer, CustomerFilter } from '../../models/customer';
+import { getApiMessage } from '../../shared/api-helpers';
+import { failMessage, isOk } from '../../shared/api-result';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+ 
 @Component({
   selector: 'app-customer-list',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
     ReactiveFormsModule,
     MatTableModule,
     MatButtonModule,
-    MatDialogModule,
+    MatIconModule,
+    MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
+    MatProgressBarModule,
     MatPaginatorModule,
-    MatSortModule,
+    MatDialogModule,
   ],
   templateUrl: './customer-list.component.html',
-  styleUrls: ['./customer-list.component.css'],
+  styleUrl: '../../shared/master-page.css',
 })
 export class CustomerListComponent implements OnInit {
-
-  customer = signal<Customer[]>([]);
-  dataSource!: MatTableDataSource<Customer>;
-
-  displayedColumns: string[] = [
+  private readonly service = inject(CustomerService);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+ 
+  readonly displayedColumns = [
     'customerCode',
     'customerName',
-    'contactPerson',
-    'mobileNo',
-    'email',
-    'address1',
-    'address2',
     'city',
     'state',
-    'country',
-    'zipCode',
-    'gstNo',
-    'isActive',
+    'status',
     'actions',
   ];
-
-  isLoading = false;
-
-  filterForm!: FormGroup;
-  pageSize = 10;
-  pageIndex = 0;
-  totalRecords = 0;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-
-  constructor(
-    private service: CustomerService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private fb: FormBuilder,
-  ) {}
-
-  ngOnInit(): void {
-    this.initFilterForm();
-    this.loadcustomer();
-  }
-
-  initFilterForm() {
-    this.filterForm = this.fb.group({
-      customerCode: [''],
-      customerName: [''],
-      city: [''],
-    });
-
+ 
+  readonly customers = signal<Customer[]>([]);
+  readonly isLoading = signal(false);
+  readonly totalRecords = signal(0);
+  readonly pageIndex = signal(0);
+  readonly pageSize = signal(10);
+ 
+  // SEARCH FILTERS
+  readonly filterForm = this.fb.group({
+    customerCode: [''],
+    customerName: [''],
+    city: [''],
+    IsActive: [null as boolean | null],
+  });
+ 
+  constructor() {
+    // search while typing (wait 400 ms after the last key)
     this.filterForm.valueChanges
-      .pipe(debounceTime(400), distinctUntilChanged())
+      .pipe(debounceTime(400), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        this.pageIndex = 0;
-        this.loadcustomer();
+        this.pageIndex.set(0);
+        void this.load();
       });
   }
-
-  clearFilters() {
+ 
+  ngOnInit(): void {
+    void this.load();
+  }
+ 
+  async load(): Promise<void> {
+    this.isLoading.set(true);
+ 
+    try {
+      const value = this.filterForm.getRawValue();
+ 
+      const filter: CustomerFilter = {
+        customerCode: value.customerCode ?? '',
+        customerName: value.customerName ?? '',
+        city: value.city ?? '',
+        isActive: value.IsActive,
+        pageNumber: this.pageIndex() + 1,
+        pageSize: this.pageSize(),
+      };
+ 
+      const response = await firstValueFrom(this.service.getPaged(filter));
+ 
+      if (!response.success) {
+        this.notify(response.message || 'Unable to load customers');
+        return;
+      }
+ 
+      this.customers.set(response.data?.data ?? []);
+      this.totalRecords.set(response.data?.totalRecords ?? 0);
+    } catch (error) {
+      this.notify(getApiMessage(error, 'Unable to load customers'));
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+ 
+  clearFilters(): void {
     this.filterForm.reset({
       customerCode: '',
       customerName: '',
       city: '',
+      IsActive: null,
     });
-
-    this.pageIndex = 0;
-    this.loadcustomer();
   }
-
-  onPageChange(event: any) {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.loadcustomer();
+ 
+  onPage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+    void this.load();
   }
-
-    async loadcustomer() {
-    this.isLoading = true;
-
+ 
+  // ---------------- NAVIGATION ----------------
+  add(): void {
+    void this.router.navigate(['/masters/customers/create']);
+  }
+ 
+  edit(c: Customer): void {
+    void this.router.navigate(['/masters/customers/edit', c.id]);
+  }
+ 
+  // ---------------- DELETE ----------------
+  async remove(c: Customer): Promise<void> {
+    const confirmed = await firstValueFrom(
+      this.dialog
+        .open(ConfirmDialogComponent, { width: '420px', data: { name: c.customerName } })
+        .afterClosed(),
+    );
+ 
+    if (!confirmed) {
+      return;
+    }
+ 
     try {
-      const filter = this.filterForm.value || {};
-
-      const res: PagedResult<Customer> = await firstValueFrom(
-        this.service.getPagedCustomer(
-          filter.customerCode,
-          filter.customerName,
-          filter.city,
-          this.pageIndex + 1,
-          this.pageSize
-        )
+      const response = await firstValueFrom(this.service.delete(c.id));
+ 
+      this.notify(
+        isOk(response)
+          ? `${c.customerName} deleted`
+          : failMessage(response, 'Delete failed'),
       );
-
-      this.customer.set(res?.data ?? []);
-      this.totalRecords = res.totalRecords;
-      this.dataSource = new MatTableDataSource(res?.data ?? []);
-
-      setTimeout(() => {
-        this.dataSource.sort = this.sort;
-      });
-
-    } catch {
-      this.snackBar.open('Customer Loading Error', 'Close', {
-        duration: 3000
-      });
-
-    } finally {
-      this.isLoading = false;
+ 
+      await this.load();
+    } catch (error) {
+      // e.g. "Customer is used in sales invoices and cannot be deleted"
+      this.notify(getApiMessage(error, 'Delete failed'));
     }
   }
-
-  async delete(id: number, name: string) {
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '350px',
-      data: { name },
-    });
-
-    const result = await firstValueFrom(dialogRef.afterClosed());
-
-    if (!result) return;
-
-    try {
-      await firstValueFrom(this.service.delete(id));
-
-      this.snackBar.open('Customer deleted successfully', 'Close', {
-        duration: 3000,
-      });
-
-      await this.loadcustomer();
-      this.clearFilters();
-
-    } catch {
-
-      this.snackBar.open('Customer delete error', 'Close', {
-        duration: 3000,
-      });
-
-    }
+ 
+  private notify(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 4000 });
   }
-
-  openAddDialog() {
-
-    const dialogRef = this.dialog.open(CustomerFormComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-      panelClass: 'custom-dialog',
-      autoFocus: false,
-      data: null,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-
-      if (result) {
-
-        this.snackBar.open('Customer created successfully', 'Close', {
-          duration: 3000
-        });
-
-        this.loadcustomer();
-      }
-
-    });
-
-  }
-
-  openEditDialog(customer: any) {
-
-    const dialogRef = this.dialog.open(CustomerFormComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-      panelClass: 'custom-dialog',
-      autoFocus: false,
-      data: customer,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-
-      if (result === true) {
-
-        this.snackBar.open('Customer updated successfully', 'Close', {
-          duration: 3000
-        });
-
-        this.loadcustomer();
-
-      }
-
-    });
-
-  }
-
 }
+ 
+ 

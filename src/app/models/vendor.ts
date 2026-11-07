@@ -1,18 +1,27 @@
-export interface Vendor
-{
-    Id: number;
-    VendorCode: string;
-    VendorName: string;
-    ContactPerson?: string;
-    MobileNo?: string;
-    Email?: string;
-    Address1?: string;
-    Address2?: string;
-    City?: string;
-    State?: string;
-    Country?: string;
-    ZipCode?: string;
-    GstNo?: string;
-    IsActive?: boolean;
-    IsDeleted?: boolean;
+export interface Vendor {
+  id: number;
+  vendorCode: string;
+  vendorName: string;
+  city?: string | null;   // ASSUMED: remove if your Vendor DTO has no city/state
+  state?: string | null;
+  isActive?: boolean | null;
+  isDeleted: boolean | false;
+}
+ 
+export interface VendorFilter {
+  vendorCode: string;
+  vendorName: string;
+  city: string;
+  isActive: boolean | null;
+  pageNumber: number;
+  pageSize: number;
+}
+ 
+export interface VendorRequest {
+  vendorCode: string;
+  vendorName: string;
+  city: string | null;
+  state: string | null;
+  isActive: boolean;
+  isDeleted: boolean | false;
 }

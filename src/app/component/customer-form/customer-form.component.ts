@@ -1,160 +1,141 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CustomerService } from '../../services/customer.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent} from '@angular/material/dialog';
-import {Customer } from '../../models/customer';
-import { SelectOnFocusDirective } from "../../custom-directives/select-on-focus.directive";
-
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CustomerService } from '../../services/customer.service';
+import { CustomerRequest } from '../../models/customer';
+import { getApiMessage } from '../../shared/api-helpers';
+import { failMessage, isOk } from '../../shared/api-result';
+ 
 @Component({
   selector: 'app-customer-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
-    RouterModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatRadioModule,
-    MatSelectModule,
-    MatIconModule,
-    SelectOnFocusDirective,
-    MatDialogContent
+    MatCheckboxModule,
+    MatProgressBarModule,
   ],
   templateUrl: './customer-form.component.html',
-  styleUrls: ['./customer-form.component.css']
+  styleUrl: '../../shared/master-page.css',
 })
 export class CustomerFormComponent implements OnInit {
-
-  form!: FormGroup;
-  isEdit = false;
-  id!: number;
-  isSubmitted = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private service: CustomerService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private snackBar: MatSnackBar,
-    public dialogRef: MatDialogRef<CustomerFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) { }
-
-  get f() {
-    return this.form.controls;
-  }
-
-  ngOnInit(): void {
-
-    this.form = this.fb.group({
-
-      customerCode: ['',[ Validators.required, Validators.minLength(1), Validators.maxLength(20)]],
-      customerName: ['',[ Validators.required,  Validators.minLength(1),  Validators.maxLength(100)]],
-      contactPerson: ['',[ Validators.maxLength(100)]],
-      mobileNo: ['',[ Validators.maxLength(20)]],
-      email: ['',[ Validators.email, Validators.maxLength(100)]],
-      address1: ['',[ Validators.maxLength(200)]],
-      address2: ['',[ Validators.maxLength(200)]],
-      city: ['',[ Validators.maxLength(100) ]],
-      state: ['',[ Validators.maxLength(100)]],
-      country: ['',[ Validators.maxLength(100)]],
-      zipCode: ['',[ Validators.maxLength(20)]],
-      gstNo: ['',[ Validators.maxLength(50)]],
-      isActive: [true],
-      isDeleted: [false],
-      createdBy: ['Admin']
-    });
-    
-    if (this.data) {
-      this.isEdit = true;
-      this.id = this.data.id;
-      this.form.patchValue(this.data);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly service = inject(CustomerService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
+ 
+  readonly customerId = signal(0);
+  readonly isEdit = computed(() => this.customerId() > 0);
+  readonly isLoading = signal(false);
+  readonly isSaving = signal(false);
+ 
+  readonly form = this.fb.group({
+    customerCode: ['', [Validators.required, Validators.maxLength(20)]],
+    customerName: ['', [Validators.required, Validators.maxLength(100)]],
+    city: ['', Validators.maxLength(50)],
+    state: ['', Validators.maxLength(50)],
+    IsActive: [true],
+  });
+ 
+  async ngOnInit(): Promise<void> {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+ 
+    if (id > 0) {
+      this.customerId.set(id);
+      await this.load(id);
     }
   }
-
-  submit() {
-
-    this.isSubmitted = true;
-  console.log("Form Valid:", this.form.valid);
-  console.log("Form Value:", this.form.value);
-
+ 
+  private async load(id: number): Promise<void> {
+    this.isLoading.set(true);
+ 
+    try {
+      const response = await firstValueFrom(this.service.getById(id));
+ 
+      if (!response.success || !response.data) {
+        this.notify(response.message || 'Customer not found');
+        this.goBack();
+        return;
+      }
+ 
+      const c = response.data;
+ 
+      this.form.patchValue({
+        customerCode: c.customerCode,
+        customerName: c.customerName,
+        city: c.city ?? '',
+        state: c.state ?? '',
+        IsActive: c.isActive ?? true,
+      });
+ 
+      this.form.markAsPristine();
+    } catch (error) {
+      this.notify(getApiMessage(error, 'Unable to load the customer'));
+      this.goBack();
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+ 
+  async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.notify('Please fix the highlighted errors');
       return;
     }
-
-    const formValue = this.form.value;
-
-    const payload: Customer = {
-  ...formValue,
-  isActive: formValue.isActive === true,
-  isDeleted: formValue.isDeleted === true
-};
-  console.log("Customer Id:", this.id);
-  console.log("Payload:", payload);
-
-    if (this.isEdit) {
-
-      this.service.Update(this.id, payload).subscribe({
-
-        next: () => {
-          this.dialogRef.close(true);
-        },
-
-        error: () => {
-          this.snackBar.open(
-            'Error updating customer',
-            'Close',
-            {
-              duration: 3000
-            }
-          );
-        }
-
-      });
-
-    } else {
-
-      this.service.create(payload).subscribe({
-
-        next: () => {
-          this.dialogRef.close(true);
-        },
-
-        error: () => {
-          this.snackBar.open(
-            'Error creating customer',
-            'Close',
-            {
-              duration: 3000
-            }
-          );
-        }
-
-      });
-
+ 
+    const value = this.form.getRawValue();
+ 
+    const request: CustomerRequest = {
+      customerCode: value.customerCode.trim(),
+      customerName: value.customerName.trim(),
+      city: value.city.trim() || null,
+      state: value.state.trim() || null,
+      isActive: value.IsActive,
+      isDeleted: false
+    };
+ 
+    this.isSaving.set(true);
+ 
+    try {
+      const response = this.isEdit()
+        ? await firstValueFrom(this.service.update(this.customerId(), request))
+        : await firstValueFrom(this.service.create(request));
+ 
+      if (!isOk(response)) {
+        this.notify(failMessage(response, 'Save failed'));
+        return;
+      }
+ 
+      this.notify(this.isEdit() ? 'Customer updated successfully' : 'Customer created successfully');
+ 
+      this.form.markAsPristine();
+      this.goBack();
+    } catch (error) {
+      // e.g. duplicate code
+      this.notify(getApiMessage(error, 'Unable to save the customer'));
+    } finally {
+      this.isSaving.set(false);
     }
-
   }
-
-  allowOnlyNumbers(event: KeyboardEvent) {
-
-    const charCode = event.key;
-
-    if (!/^[0-9]$/.test(charCode)) {
-      event.preventDefault();
-    }
-
+ 
+  goBack(): void {
+    void this.router.navigate(['/masters/customers']);
   }
-
+ 
+  private notify(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 4000 });
+  }
 }
+ 
+ 
