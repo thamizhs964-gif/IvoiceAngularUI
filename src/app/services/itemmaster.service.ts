@@ -1,54 +1,56 @@
-import {Injectable,signal} from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { Itemmaster } from "../models/itemmaster";
-import { PagedResult } from "../models/paged-result";
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environments';
+import { Itemmaster } from '../models/itemmaster';
+import { ItemmasterFilter } from '../models/itemmaster-filter';
+import { PagedResult } from '../models/paged-result';
+import { ApiResponse } from '../models/api-response';
  
-@Injectable({providedIn:'root'})
+@Injectable({
+  providedIn: 'root',
+})
+export class ItemmasterService {
+  private readonly http = inject(HttpClient);
  
-export class ItemmasterService
-{
-    private apiUrl="http://localhost:5258/api/ItemMaster";
-    items = signal<Itemmaster[]>([]);
-    constructor(private http:HttpClient){}
-    getPagedItems
-    (
-        catCode: string,
-        itemName: string,
-        uom: string,
-        PageNumber: number,
-        PageSize:number
-    ): Observable<PagedResult<Itemmaster>>
-    {
-        let params =  new HttpParams()
-        .set('catCode', catCode || '')
-        .set('itemName', itemName || '')
-        .set('uom', uom || '')
-        .set('PageNumber', PageNumber)
-        .set('PageSize', PageSize);
-        return this.http.get<PagedResult<Itemmaster>>
-        (`${this.apiUrl}/GetAllPaged`, {params});
-    }
-    GetAll():Observable<Itemmaster[]>
-    {
-        return this.http.get<Itemmaster[]>(`${this.apiUrl}/GetAll`);
-    }
-    GetById(Id:number):Observable<Itemmaster>
-    {
-        return this.http.get<Itemmaster>(`${this.apiUrl}/GetById/${Id}`);
-    }
-    create(request:Itemmaster):Observable<number>
-    {
-        return this.http.post<number>(`${this.apiUrl}/Create`,request);
-    }
-    Update(Id:number, request:Itemmaster):Observable<boolean>
-    {
-        return this.http.put<boolean>(`${this.apiUrl}/Update/${Id}`,request);
-    }
-    delete(Id:number):Observable<boolean>
-    {
-        return this.http.delete<boolean>(`${this.apiUrl}/delete/${Id}`);
-    }
+  private readonly apiUrl = `${environment.apiUrl}/v1/Itemmaster`;
+ 
+  getPagedItems(filter: ItemmasterFilter): Observable<ApiResponse<PagedResult<Itemmaster>>> {
+    const params = new HttpParams()
+      .set('categoryId', filter.categoryId ?? '')
+      .set('itemBarCode', filter.itemBarCode ?? '')
+      .set('itemCode', filter.itemCode ?? '')
+      .set('itemName', filter.itemName ?? '')
+      .set('uom', filter.uom ?? '')
+      .set('isActive', filter.isActive ?? '')
+      .set('pageNumber', filter.pageNumber)
+      .set('pageSize', filter.pageSize);
+ 
+    return this.http.get<ApiResponse<PagedResult<Itemmaster>>>(
+      `${this.apiUrl}/GetAllPaged`,
+      { params },
+    );
+  }
+ 
+  getAll(): Observable<Itemmaster[]> {
+    return this.http.get<Itemmaster[]>(`${this.apiUrl}/GetAll`);
+  }
+ 
+  getById(id: number): Observable<Itemmaster> {
+    return this.http.get<Itemmaster>(`${this.apiUrl}/GetById/${id}`);
+  }
+ 
+  create(request: Itemmaster): Observable<number> {
+    return this.http.post<number>(`${this.apiUrl}/Create`, request);
+  }
+ 
+  update(id: number, request: Itemmaster): Observable<boolean> {
+    return this.http.put<boolean>(`${this.apiUrl}/Update/${id}`, request);
+  }
+ 
+  delete(id: number): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.apiUrl}/Delete/${id}`);
+  }
 }
  
  

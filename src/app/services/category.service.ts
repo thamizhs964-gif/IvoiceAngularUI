@@ -1,52 +1,71 @@
-import { Injectable, signal } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { Category } from "../models/category";
-import { PagedResult } from "../models/paged-result";
-
-@Injectable({ providedIn: 'root'})
-
-export class CategoryService 
-{
-  private apiUrl = "http://localhost:5258/api/Category";
-  categories = signal<Category[]>([]);
-  constructor(
-    private http: HttpClient) {}
-  getPagedItems
-  (
-    code: string,
-    name: string,
-    PageNumber: number,
-    PageSize: number
-  ): Observable<PagedResult<Category>> 
-  {
+ 
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environments';
+import { Category } from '../models/category';
+import { CategoryFilter } from '../models/category-filter';
+import { ApiResponse } from '../models/api-response';
+ 
+// Your API returns data[] and totalRecords at the root level.
+export type CategoryListResponse = ApiResponse<Category[]> & {
+  totalRecords: number;
+};
+ 
+@Injectable({
+  providedIn: 'root',
+})
+export class CategoryService {
+  private readonly http = inject(HttpClient);
+ 
+  private readonly apiUrl = `${environment.apiUrl}/v1/Category`;
+ 
+  // GET: api/v1/Category/GetAllPaged
+  getPaged(
+    filter: CategoryFilter,
+  ): Observable<CategoryListResponse> {
+ 
     let params = new HttpParams()
-      .set('code', code || '')
-      .set('name', name || '')
-      .set('PageNumber', PageNumber)
-      .set('PageSize', PageSize);
-    return this.http.get<PagedResult<Category>>
-    (`${this.apiUrl}/GetAllPaged`,{ params });
+      .set('code', filter.code ?? '')
+      .set('name', filter.name ?? '')
+      .set('pageNumber', String(filter.pageNumber))
+      .set('pageSize', String(filter.pageSize));
+ 
+      if (filter.isActive !== null && filter.isActive !== undefined) {
+    params = params.set('isActive', String(filter.isActive));
   }
-
-  GetAll(): Observable<Category[]> 
-  {
-    return this.http.get<Category[]>(`${this.apiUrl}/GetAll`);
+ 
+    return this.http.get<CategoryListResponse>(
+      `${this.apiUrl}/GetAllPaged`,
+      { params },
+    );
   }
-  GetById(Id: number): Observable<Category> 
-  {
-    return this.http.get<Category>(`${this.apiUrl}/GetById/${Id}`);
+ 
+  getAll(): Observable<ApiResponse<Category[]>> {
+    return this.http.get<ApiResponse<Category[]>>(
+      `${this.apiUrl}/GetAll`
+    );
   }
-  create(request: Category): Observable<number> 
-  {
-    return this.http.post<number>(`${this.apiUrl}/Create`,request);
+ 
+  getById(id: number): Observable<ApiResponse<Category>> {
+    return this.http.get<ApiResponse<Category>>(
+      `${this.apiUrl}/GetById/${id}`
+    );
   }
-  Update(Id: number, request: Category): Observable<boolean> 
-  {
-    return this.http.put<boolean>(`${this.apiUrl}/Update/${Id}`,request);
+ 
+  create(category: Category): Observable<ApiResponse<Category>> {
+    return this.http.post<ApiResponse<Category>>(
+      `${this.apiUrl}/Create`,
+      category
+    );
   }
-  delete(Id: number): Observable<boolean>
-  {
-    return this.http.delete<boolean>(`${this.apiUrl}/Delete/${Id}`);
+ 
+  update(id: number, category: Category): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${this.apiUrl}/Update/${id}`,
+      category
+    );
   }
 }
+ 
+ 

@@ -1,21 +1,19 @@
 import { Directive, HostListener } from '@angular/core';
-@Directive({
+ 
+@Directive
+({
   selector: '[appSelectOnFocus]',
   standalone: true
 })
-export class SelectOnFocusDirective {
-
+export class SelectOnFocusDirective
+{
   constructor() { }
-
   @HostListener('focus', ['$event'])
-  onFocus(event: FocusEvent): void {
-
+  onFocus(event: FocusEvent) {
     const input = event.target as HTMLInputElement | null;
-
     if (input && input.value) {
-      setTimeout(() => input.select(), 0);
+      setTimeout(() => input.select(), 0); // safe for Angular Material
     }
-
   }
-
 }
+ 

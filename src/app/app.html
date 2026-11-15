@@ -1,36 +1,80 @@
 <mat-toolbar class="top-menu">
- 
-  <button mat-button routerLink="/home" routerLinkActive="active-link">Home</button>
+  <!-- Home -->
+  <button mat-button routerLink="/home" routerLinkActive="active-link">
+    Home
+  </button>
 
-  <button mat-button [matMenuTriggerFor]="mastersMenu" routerLinkActive="active-link">Masters</button>
+  <!-- Masters Menu -->
+  <button
+    mat-button
+    [matMenuTriggerFor]="mastersMenu"
+    routerLinkActive="active-link"
+  >
+    Masters
+  </button>
   <mat-menu #mastersMenu="matMenu">
-    <button mat-menu-item routerLink="/masters/category">Category</button>
-    <button mat-menu-item routerLink="/masters/itemmaster">itemmaster</button>
-    <button mat-menu-item routerLink="/masters/customer">Customer</button>
+    <button mat-menu-item routerLink="/masters/categories">Categories</button>
+    <button mat-menu-item routerLink="/masters/items">Items</button>
+    <button mat-menu-item routerLink="/masters/customers">Customers</button>
+    <button mat-menu-item routerLink="/masters/vendors">Vendors</button>
     <button mat-menu-item routerLink="/masters/users">Users</button>
-    <button mat-menu-item routerLink="/masters/vendor">Vendor</button>
   </mat-menu>
- 
-   
-  <button mat-button [matMenuTriggerFor]="transMenu" routerLinkActive="active-link">Transactions</button>
+
+  <!-- Transactions Menu -->
+  <button
+    mat-button
+    [matMenuTriggerFor]="transMenu"
+    routerLinkActive="active-link"
+  >
+    Transactions
+  </button>
   <mat-menu #transMenu="matMenu">
     <button mat-menu-item routerLink="/transactions/indent">Indent</button>
     <button mat-menu-item routerLink="/transactions/po">Purchase Order</button>
-    <button mat-menu-item routerLink="/transactions/inward">Material Inward</button>
+    <button mat-menu-item routerLink="/transactions/inward">
+      Material Inward
+    </button>
     <button mat-menu-item routerLink="/transactions/receipt">Receipt</button>
+    <button mat-menu-item routerLink="/transactions/sales-invoice">Sales Invoice</button>
+    <button mat-menu-item routerLink="/transactions/stock">Stock</button>
   </mat-menu>
- 
-  
+
+  <!-- Other Menus -->
   <button mat-button>Processings</button>
   <button mat-button>Reports</button>
-  <button mat-button>Utilities</button>
- 
+  <button
+    mat-button
+    [matMenuTriggerFor]="utilMenu"
+    routerLinkActive="active-link"
+  >
+    Utilities
+  </button>
+  <mat-menu #utilMenu="matMenu">
+    <button mat-menu-item routerLink="/utilities/ai-assistant">AI Assistant</button>
+  </mat-menu>
+
+  <!-- Push user to right -->
   <span class="spacer"></span>
- 
-  <button mat-button color="warn">Exit</button>
- <mat-menu #exitMenu="matMenu">
+
+  <!-- Logged in User -->
+  <button mat-button class="user-name" [matMenuTriggerFor]="exitMenu">
+    <span class="user-icon">👤</span>
+
+    {{ currentUserName() || "User" }}
+  </button>
+
+  <button
+    mat-button
+    color="warn"
+    [matMenuTriggerFor]="exitMenu"
+    routerLinkActive="active-link"
+  >
+    Exit
+  </button>
+  <mat-menu #exitMenu="matMenu">
     <button mat-menu-item routerLink="/exit/logout">Logout</button>
   </mat-menu>
 </mat-toolbar>
+
+<!-- Route View -->
 <router-outlet></router-outlet>
- 
