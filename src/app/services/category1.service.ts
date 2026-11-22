@@ -31,28 +31,18 @@ export class CategoryService {
     params = params.set('name', filter.name.trim());
   }
  
-  if (filter.isActive !== null) {
-    params = params.set('isActive', filter.isActive);
+  if (filter.isactive !== null) {
+    params = params.set('isactive', filter.isactive);
   }
  
   return this.http.get<ApiResponse<Category[]>>(
     `${this.apiUrl}/GetAllPaged`,
     { params }
-  ).pipe(
-    map(response => ({
-      ...response,
-      data: response.data?.map(category => this.normalizeCategory(category)) ?? [],
-    })),
   );
 }
  
   getById(id: number): Observable<ApiResponse<Category>> {
-    return this.http.get<ApiResponse<Category>>(`${this.apiUrl}/GetById/${id}`).pipe(
-      map(response => ({
-        ...response,
-        data: response.data ? this.normalizeCategory(response.data) : response.data,
-      })),
-    );
+    return this.http.get<ApiResponse<Category>>(`${this.apiUrl}/GetById/${id}`);
   }
  
   // Write calls return `unknown` because older controllers answer with a plain
@@ -69,12 +59,6 @@ export class CategoryService {
     return this.http.delete<unknown>(`${this.apiUrl}/Delete/${id}`);
   }
 
-  private normalizeCategory(category: Category): Category {
-    return {
-      ...category,
-      isActive: category.isActive ?? category.isActive,
-    };
-  }
 }
  
  
