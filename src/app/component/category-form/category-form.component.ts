@@ -43,7 +43,7 @@ export class CategoryFormComponent implements OnInit {
     code: ['', [Validators.required, Validators.maxLength(5)]],
     name: ['', [Validators.required, Validators.maxLength(25)]],
     description: ['', Validators.maxLength(100)],
-    IsActive: [true],
+    isActive: [true],
   });
  
   async ngOnInit(): Promise<void> {
@@ -73,7 +73,7 @@ export class CategoryFormComponent implements OnInit {
         code: c.code,
         name: c.name,
         description: c.description ?? '',
-        IsActive: c.IsActive ?? true,
+        isActive: c.isActive ?? true,
       });
  
       this.form.markAsPristine();
@@ -98,7 +98,7 @@ export class CategoryFormComponent implements OnInit {
       code: value.code.trim(),
       name: value.name.trim(),
       description: value.description.trim() || null,
-      IsActive: value.IsActive,
+      isActive: value.isActive,
     };
  
     this.isSaving.set(true);

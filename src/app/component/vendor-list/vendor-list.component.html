@@ -21,7 +21,14 @@
       <input matInput formControlName="vendorName" placeholder="Search..." />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Mobile Number</mat-label>
+      <input matInput formControlName="mobileNumber" placeholder="Search..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
  
+
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>City</mat-label>
       <input matInput formControlName="city" placeholder="Search..." />
@@ -62,6 +69,11 @@
     <ng-container matColumnDef="city">
       <th mat-header-cell *matHeaderCellDef>City</th>
       <td mat-cell *matCellDef="let c">{{ c.city }}</td>
+    </ng-container>
+
+      <ng-container matColumnDef="mobileNumber">
+      <th mat-header-cell *matHeaderCellDef>Mobile Number</th>
+      <td mat-cell *matCellDef="let c">{{ c.mobileNo }}</td>
     </ng-container>
  
     <ng-container matColumnDef="state">

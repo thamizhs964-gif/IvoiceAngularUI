@@ -42,9 +42,10 @@ export class CustomerFormComponent implements OnInit {
   readonly form = this.fb.group({
     customerCode: ['', [Validators.required, Validators.maxLength(20)]],
     customerName: ['', [Validators.required, Validators.maxLength(100)]],
+    mobileNumber: ['', Validators.maxLength(15)],
     city: ['', Validators.maxLength(50)],
     state: ['', Validators.maxLength(50)],
-    IsActive: [true],
+    isActive: [true],
   });
  
   async ngOnInit(): Promise<void> {
@@ -73,9 +74,10 @@ export class CustomerFormComponent implements OnInit {
       this.form.patchValue({
         customerCode: c.customerCode,
         customerName: c.customerName,
+        mobileNumber: c.mobileNo ?? '',
         city: c.city ?? '',
         state: c.state ?? '',
-        IsActive: c.isActive ?? true,
+        isActive: c.isActive ?? true,
       });
  
       this.form.markAsPristine();
@@ -99,9 +101,10 @@ export class CustomerFormComponent implements OnInit {
     const request: CustomerRequest = {
       customerCode: value.customerCode.trim(),
       customerName: value.customerName.trim(),
+      mobileNo: value.mobileNumber.trim() || null,
       city: value.city.trim() || null,
       state: value.state.trim() || null,
-      isActive: value.IsActive,
+      isActive: value.isActive,
       isDeleted: false
     };
  

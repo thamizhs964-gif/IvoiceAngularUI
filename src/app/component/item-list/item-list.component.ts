@@ -56,7 +56,7 @@ export class ItemListComponent implements OnInit {
     'rate',
     'minimumStock',
     'maximumStock',
-    'IsActive',
+    'isActive',
     'actions',
   ];
  

@@ -56,7 +56,7 @@ export class UserFormComponent implements OnInit {
       '',
       [Validators.required, Validators.minLength(8), Validators.maxLength(100)],
     ],
-    IsActive: [true],
+    isActive: [true],
     // Name
     firstName: ['', [Validators.required, Validators.maxLength(50)]],
     middleName: ['', Validators.maxLength(50)],
@@ -105,7 +105,7 @@ export class UserFormComponent implements OnInit {
       this.form.patchValue({
         userName: u.userName,
         email: u.email,
-        IsActive: u.isActive,
+        isActive: u.isActive,
         firstName: u.firstName,
         middleName: u.middleName ?? '',
         lastName: u.lastName,
@@ -157,7 +157,7 @@ export class UserFormComponent implements OnInit {
       zipCode: v.zipCode.trim(),
       country: v.country.trim(),
       dateOfBirth: v.dateOfBirth ? toApiDate(v.dateOfBirth) : null,
-      isActive: v.IsActive,
+      isActive: v.isActive,
       ...(!this.isEdit() ? { password: v.password } : {}),
     };
  

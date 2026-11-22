@@ -21,6 +21,12 @@
       <input matInput formControlName="customerName" placeholder="Search..." />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
+
+     <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Mobile Number</mat-label>
+      <input matInput formControlName="mobileNumber" placeholder="Search..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
  
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>City</mat-label>
@@ -29,7 +35,7 @@
  
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Status</mat-label>
-      <mat-select formControlName="IsActive">
+      <mat-select formControlName="isActive">
         <mat-option [value]="null">All</mat-option>
         <mat-option [value]="true">Active</mat-option>
         <mat-option [value]="false">Inactive</mat-option>
@@ -58,6 +64,12 @@
       <th mat-header-cell *matHeaderCellDef>Name</th>
       <td mat-cell *matCellDef="let c">{{ c.customerName }}</td>
     </ng-container>
+
+    
+    <ng-container matColumnDef="mobileNumber">
+      <th mat-header-cell *matHeaderCellDef>Mobile Number</th>
+      <td mat-cell *matCellDef="let c">{{ c.mobileNo }}</td>
+    </ng-container>
  
     <ng-container matColumnDef="city">
       <th mat-header-cell *matHeaderCellDef>City</th>
@@ -74,10 +86,10 @@
       <td mat-cell *matCellDef="let c">
         <span
           class="badge"
-          [class.badge-active]="c.IsActive"
-          [class.badge-inactive]="!c.IsActive"
+          [class.badge-active]="c.isActive"
+          [class.badge-inactive]="!c.isActive"
         >
-          {{ c.IsActive ? "Active" : "Inactive" }}
+          {{ c.isActive ? "Active" : "Inactive" }}
         </span>
       </td>
     </ng-container>

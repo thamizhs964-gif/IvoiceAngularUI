@@ -51,6 +51,7 @@ export class VendorListComponent implements OnInit {
   readonly displayedColumns = [
     'vendorCode',
     'vendorName',
+    'mobileNumber',
     'city',
     'state',
     'status',
@@ -67,6 +68,7 @@ export class VendorListComponent implements OnInit {
   readonly filterForm = this.fb.group({
     vendorCode: [''],
     vendorName: [''],
+    mobileNumber: [''],
     city: [''],
     isActive: [null as boolean | null],
   });
@@ -94,6 +96,7 @@ export class VendorListComponent implements OnInit {
       const filter: VendorFilter = {
         vendorCode: value.vendorCode ?? '',
         vendorName: value.vendorName ?? '',
+        mobileNumber: value.mobileNumber ?? '',
         city: value.city ?? '',
         isActive: value.isActive,
         pageNumber: this.pageIndex() + 1,
@@ -120,6 +123,7 @@ export class VendorListComponent implements OnInit {
     this.filterForm.reset({
       vendorCode: '',
       vendorName: '',
+      mobileNumber: '',
       city: '',
       isActive: null,
     });

@@ -3,7 +3,7 @@ export interface Category {
   code: string;
   name: string;
   description?: string;
-  IsActive: boolean;
+  isActive: boolean;
   createdBy?: string;
   createdDate?: string;
   updatedBy?: string;
@@ -13,7 +13,7 @@ export interface Category {
 export interface CategoryFilter {
   code: string;
   name: string;
-  IsActive: boolean | null;
+  isActive: boolean | null;
   pageNumber: number;
   pageSize: number;
 }
@@ -22,7 +22,7 @@ export interface CategoryRequest {
   code: string;
   name: string;
   description?: string | null;
-  IsActive: boolean;
+  isActive: boolean;
 }
  
  

@@ -102,9 +102,11 @@
       <td mat-cell *matCellDef="let item">{{ item.maximumStock }}</td>
     </ng-container>
  
-    <ng-container matColumnDef="IsActive">
+    <ng-container matColumnDef="isActive">
       <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let item">{{ item.IsActive }}</td>
+      <td mat-cell *matCellDef="let item">
+        {{ item.isActive ? "Active" : "Inactive" }}
+      </td>
     </ng-container>
  
     <ng-container matColumnDef="actions">
