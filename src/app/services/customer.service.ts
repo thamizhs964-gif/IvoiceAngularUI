@@ -25,13 +25,17 @@ export class CustomerService {
     if (filter.customerName?.trim()) {
       params = params.set('customerName', filter.customerName.trim());
     }
+
+    if (filter.mobileNumber?.trim()) {
+      params = params.set('mobileNo', filter.mobileNumber.trim());
+    }
  
     if (filter.city?.trim()) {
       params = params.set('city', filter.city.trim());
     }
  
     if (filter.isActive !== null) {
-      params = params.set('IsActive', filter.isActive);
+      params = params.set('isActive', filter.isActive);
     }
  
     return this.http.get<ApiResponse<PagedResult<Customer>>>(

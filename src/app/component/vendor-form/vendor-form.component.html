@@ -24,6 +24,14 @@
           <mat-error>Name is required</mat-error>
         }
       </mat-form-field>
+
+        <mat-form-field appearance="outline">
+        <mat-label>Mobile Number</mat-label>
+        <input matInput formControlName="mobileNumber" maxlength="15" />
+        @if (form.controls.mobileNumber.hasError("required")) {
+          <mat-error>Mobile number is required</mat-error>
+        }
+      </mat-form-field>
  
       <mat-form-field appearance="outline">
         <mat-label>City</mat-label>

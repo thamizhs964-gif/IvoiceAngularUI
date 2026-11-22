@@ -42,6 +42,7 @@ export class VendorFormComponent implements OnInit {
   readonly form = this.fb.group({
     vendorCode: ['', [Validators.required, Validators.maxLength(20)]],
     vendorName: ['', [Validators.required, Validators.maxLength(100)]],
+    mobileNumber: ['', [Validators.required, Validators.maxLength(15)]],
     city: ['', Validators.maxLength(50)],
     state: ['', Validators.maxLength(50)],
     isActive: [true],
@@ -73,6 +74,7 @@ export class VendorFormComponent implements OnInit {
       this.form.patchValue({
         vendorCode: c.vendorCode,
         vendorName: c.vendorName,
+        mobileNumber: c.mobileNo ?? '',
         city: c.city ?? '',
         state: c.state ?? '',
         isActive: c.isActive ?? true,
@@ -100,9 +102,10 @@ export class VendorFormComponent implements OnInit {
       vendorCode: value.vendorCode.trim(),
       vendorName: value.vendorName.trim(),
       city: value.city.trim() || null,
+      mobileNo: value.mobileNumber.trim(),
       state: value.state.trim() || null,
       isActive: value.isActive,
-      isDeleted: false
+      isDeleted: false,
     };
  
     this.isSaving.set(true);

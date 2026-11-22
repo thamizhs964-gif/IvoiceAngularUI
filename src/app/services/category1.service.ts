@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environments';
 import { ApiResponse } from '../models/api-response';
 import { PagedResult } from '../models/paged-result';
@@ -30,18 +31,28 @@ export class CategoryService {
     params = params.set('name', filter.name.trim());
   }
  
-  if (filter.IsActive !== null) {
-    params = params.set('IsActive', filter.IsActive);
+  if (filter.isActive !== null) {
+    params = params.set('isActive', filter.isActive);
   }
  
   return this.http.get<ApiResponse<Category[]>>(
     `${this.apiUrl}/GetAllPaged`,
     { params }
+  ).pipe(
+    map(response => ({
+      ...response,
+      data: response.data?.map(category => this.normalizeCategory(category)) ?? [],
+    })),
   );
 }
  
   getById(id: number): Observable<ApiResponse<Category>> {
-    return this.http.get<ApiResponse<Category>>(`${this.apiUrl}/GetById/${id}`);
+    return this.http.get<ApiResponse<Category>>(`${this.apiUrl}/GetById/${id}`).pipe(
+      map(response => ({
+        ...response,
+        data: response.data ? this.normalizeCategory(response.data) : response.data,
+      })),
+    );
   }
  
   // Write calls return `unknown` because older controllers answer with a plain
@@ -56,6 +67,13 @@ export class CategoryService {
  
   delete(id: number): Observable<unknown> {
     return this.http.delete<unknown>(`${this.apiUrl}/Delete/${id}`);
+  }
+
+  private normalizeCategory(category: Category): Category {
+    return {
+      ...category,
+      isActive: category.isActive ?? category.isActive,
+    };
   }
 }
  

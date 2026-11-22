@@ -52,7 +52,7 @@ export class CategoryListComponent implements OnInit {
     'code',
     'name',
     'description',
-    'IsActive',
+    'isActive',
     'actions',
   ];
  
@@ -66,7 +66,7 @@ export class CategoryListComponent implements OnInit {
   readonly filterForm = this.fb.group({
     code: [''],
     name: [''],
-    IsActive: [null as boolean | null],
+    isActive: [null as boolean | null],
   });
  
   constructor() {
@@ -93,7 +93,7 @@ async load(): Promise<void> {
     const filter: CategoryFilter = {
       code: value.code ?? '',
       name: value.name ?? '',
-    IsActive: value.IsActive,
+      isActive: value.isActive,
       pageNumber: this.pageIndex() + 1,
       pageSize: this.pageSize(),
     };
@@ -131,7 +131,7 @@ async load(): Promise<void> {
     this.filterForm.reset({
       code: '',
       name: '',
-      IsActive: null,
+      isActive: null,
     });
   }
  

@@ -110,7 +110,10 @@ export class ItemFormComponent implements OnInit {
     if (this.data) {
       this.isEdit = true;
       this.id = this.data.id;
-      this.form.patchValue(this.data);
+      this.form.patchValue({
+        ...this.data,
+        IsActive: this.data.isActive ?? this.data.IsActive ?? true,
+      });
     }
   }
   async loadCategories(): Promise<void> {
@@ -147,7 +150,7 @@ export class ItemFormComponent implements OnInit {
       rate: Number(formValue.rate),
       minimumStock: Number(formValue.minimumStock),
       maximumStock: Number(formValue.maximumStock),
-      IsActive: formValue.IsActive === true,
+      isActive: formValue.IsActive === true,
     };
  
     if (this.isEdit) {

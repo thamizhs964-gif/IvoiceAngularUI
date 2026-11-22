@@ -24,6 +24,11 @@
           <mat-error>Name is required</mat-error>
         }
       </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Mobile Number</mat-label>
+        <input matInput formControlName="mobileNumber" maxlength="15" />
+      </mat-form-field>
  
       <mat-form-field appearance="outline">
         <mat-label>City</mat-label>
@@ -35,7 +40,7 @@
         <input matInput formControlName="state" maxlength="50" />
       </mat-form-field>
  
-      <mat-checkbox formControlName="IsActive" class="full">Active</mat-checkbox>
+      <mat-checkbox formControlName="isActive" class="full">Active</mat-checkbox>
     </div>
  
     <div class="buttons">

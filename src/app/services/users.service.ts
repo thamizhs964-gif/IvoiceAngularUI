@@ -26,10 +26,6 @@ export class UserService {
       params = params.set('email', filter.email.trim());
     }
  
-    if (filter.city?.trim()) {
-      params = params.set('city', filter.city.trim());
-    }
- 
     if (filter.isActive !== null) {
       params = params.set('isActive', filter.isActive);
     }
@@ -40,6 +36,10 @@ export class UserService {
     );
   }
  
+  getAll(): Observable<ApiResponse<User[]>> {
+    return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/GetAll`);
+  }
+
   getById(id: number): Observable<ApiResponse<User>> {
     return this.http.get<ApiResponse<User>>(`${this.apiUrl}/GetById/${id}`);
   }

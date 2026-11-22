@@ -6,7 +6,7 @@
 
   <form [formGroup]="filterForm" class="filters">
     <mat-form-field appearance="outline">
-      <mat-label>Invoice #</mat-label>
+      <mat-label>Invoice Number</mat-label>
       <input matInput formControlName="invoiceNumber" />
     </mat-form-field>
 
@@ -29,6 +29,11 @@
         }
       </mat-select>
     </mat-form-field>
+
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      Clear
+    </button>
+
   </form>
 
   <table mat-table [dataSource]="invoices()" class="mat-elevation-z1">

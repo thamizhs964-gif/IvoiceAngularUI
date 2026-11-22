@@ -104,6 +104,31 @@ export class UserListComponent implements OnInit {
         pageSize: this.pageSize(),
       };
  
+      if (filter.city.trim()) {
+        const response = await firstValueFrom(this.service.getAll());
+
+        if (!response.success) {
+          this.notify(response.message || 'Unable to load users');
+          return;
+        }
+
+        const city = filter.city.trim().toLowerCase();
+        const userName = filter.userName.trim().toLowerCase();
+        const email = filter.email.trim().toLowerCase();
+        const matchingUsers = (response.data ?? []).filter(
+          (user) =>
+            (user.city ?? '').toLowerCase().includes(city) &&
+            user.userName.toLowerCase().includes(userName) &&
+            user.email.toLowerCase().includes(email) &&
+            (filter.isActive === null || user.isActive === filter.isActive),
+        );
+        const start = this.pageIndex() * this.pageSize();
+
+        this.users.set(matchingUsers.slice(start, start + this.pageSize()));
+        this.totalRecords.set(matchingUsers.length);
+        return;
+      }
+
       const response = await firstValueFrom(this.service.getPaged(filter));
  
       if (!response.success) {
