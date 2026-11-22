@@ -73,7 +73,7 @@ export class CategoryFormComponent implements OnInit {
         code: c.code,
         name: c.name,
         description: c.description ?? '',
-        isActive: c.isActive ?? true,
+        isActive: c.isactive ?? true,
       });
  
       this.form.markAsPristine();
@@ -98,7 +98,7 @@ export class CategoryFormComponent implements OnInit {
       code: value.code.trim(),
       name: value.name.trim(),
       description: value.description.trim() || null,
-      isActive: value.isActive,
+      isactive: value.isActive,
     };
  
     this.isSaving.set(true);

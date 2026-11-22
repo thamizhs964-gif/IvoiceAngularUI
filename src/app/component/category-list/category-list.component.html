@@ -24,7 +24,7 @@
  
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Status</mat-label>
-      <mat-select formControlName="isActive">
+      <mat-select formControlName="isactive">
         <mat-option [value]="null">All</mat-option>
         <mat-option [value]="true">Active</mat-option>
         <mat-option [value]="false">Inactive</mat-option>
@@ -59,15 +59,15 @@
       <td mat-cell *matCellDef="let c">{{ c.description }}</td>
     </ng-container>
  
-    <ng-container matColumnDef="isActive">
+    <ng-container matColumnDef="isactive">
       <th mat-header-cell *matHeaderCellDef>Status</th>
       <td mat-cell *matCellDef="let c">
         <span
           class="badge"
-          [class.badge-active]="c.isActive"
-          [class.badge-inactive]="!c.isActive"
+          [class.badge-active]="c.isactive"
+          [class.badge-inactive]="!c.isactive"
         >
-          {{ c.isActive ? "Active" : "Inactive" }}
+          {{ c.isactive ? "Active" : "Inactive" }}
         </span>
       </td>
     </ng-container>

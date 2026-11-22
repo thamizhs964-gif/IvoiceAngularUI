@@ -31,8 +31,8 @@ export class CategoryService {
       .set('pageNumber', String(filter.pageNumber))
       .set('pageSize', String(filter.pageSize));
  
-      if (filter.isActive !== null && filter.isActive !== undefined) {
-    params = params.set('isActive', String(filter.isActive));
+      if (filter.isactive !== null && filter.isactive !== undefined) {
+    params = params.set('isactive', String(filter.isactive));
   }
  
     return this.http.get<CategoryListResponse>(
